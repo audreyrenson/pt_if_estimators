@@ -4,6 +4,7 @@ library(rsample)
 library(rlang)
 library(SuperLearner)
 library(furrr)
+library(didsim)
 
 nsims=3
 seed=7147147 #this has to be seven digits for L'Ecuyer-CMRG seed for furrr
