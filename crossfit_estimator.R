@@ -4,20 +4,20 @@ get_nuissance_fits = function(data,
                               intervene,# = function(df) df %>% mutate(across(starts_with('a'), ~0)),
                               return_data = FALSE) {
 
-  # predict.sl_wrapper = function(object, newdata, ...) {
-  #   #this function solves two problems.
-  #   #First, sl_wrapper allows a formula, which will lead to potential basis functions being added to the
-  #   #data frame ultimately passed to SuperLearner, but predict.SuperLearner doesn't know this.
-  #   #Second, if there are NAs in the dataset, some SL algorithms (like glmnet) return a vector of length of the complete cases,
-  #   #and others (like glm) return a vector of length nrow(data) with NAs in the missing obs slots. This function
-  #   #makes that behavior uniform, and always returns a vector of length nrow(data) in the glm-style.
-  #
-  #   newdata =  model.matrix.lm(object$formula[-2], newdata, na.action = na.pass) #object$formula[-2] drops the outcome from the formula
-  #   newdata = newdata[, object$xnames, drop=FALSE] #keep only columns in model fit, needed by e.g. ksvm
-  #   preds = rep(NA, nrow(newdata))
-  #   preds[complete.cases(newdata)] = predict.SuperLearner(object, newdata[complete.cases(newdata), ], ..., onlySL = TRUE)$pred[,1]
-  #   preds
-  # } #needed because future_map cannot find predict.sl_wrapper. I think the real solution is for this to be in a package.
+  predict.sl_wrapper = function(object, newdata, ...) {
+    #this function solves two problems.
+    #First, sl_wrapper allows a formula, which will lead to potential basis functions being added to the
+    #data frame ultimately passed to SuperLearner, but predict.SuperLearner doesn't know this.
+    #Second, if there are NAs in the dataset, some SL algorithms (like glmnet) return a vector of length of the complete cases,
+    #and others (like glm) return a vector of length nrow(data) with NAs in the missing obs slots. This function
+    #makes that behavior uniform, and always returns a vector of length nrow(data) in the glm-style.
+
+    newdata =  model.matrix.lm(object$formula[-2], newdata, na.action = na.pass) #object$formula[-2] drops the outcome from the formula
+    newdata = newdata[, object$xnames, drop=FALSE] #keep only columns in model fit, needed by e.g. ksvm
+    preds = rep(NA, nrow(newdata))
+    preds[complete.cases(newdata)] = predict.SuperLearner(object, newdata[complete.cases(newdata), ], ..., onlySL = TRUE)$pred[,1]
+    preds
+  } #needed because future_map cannot find predict.sl_wrapper. I think the real solution is for this to be in a package.
 
   #a bundle is a list containing a model fit and the data with predictions from that model, to be used by the next fit
   get_next_bundle = function(last_bundle, model,  colname) {
