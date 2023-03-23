@@ -195,7 +195,6 @@ df_psi = df_nuissance %>%
   group_by(n, sim, method) %>%
   nest() %>%
   mutate(psi = map(data, psi_from_df_nuiss)) %>%
-           #future_map(data, psi_from_df_nuiss,  .options = furrr_options(seed=seed))) %>% #parallel not worth the overhead here, at least for nsims=5
   unnest(psi) %>%
   select(-data) %>%
   group_by(n, sim, method) %>%
