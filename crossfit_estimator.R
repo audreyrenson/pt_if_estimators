@@ -177,8 +177,7 @@ psi_from_df_nuiss = function(df_nuiss) {
                                                 repair_g())) %>%
     select(fold=id, outsamp_nuissance_estimates) %>%
     unnest(outsamp_nuissance_estimates) %>%
-    calc_if() #%>%
-  #{left_join(summarise_psi(., .fns=list(est=mean, var=var)), zivich_estimator(.))} # do the variance both ways.
+    calc_if()
 }
 
 
