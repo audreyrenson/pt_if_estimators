@@ -190,16 +190,20 @@ df_nuissance = df_sims %>%
                                                           first_colname = 'y2',
                                                           intervene = function(df) df %>% mutate(across(starts_with('a'), ~0))),
                                       .options = furrr_options(seed=seed)))
-
 df_psi = df_nuissance %>%
-  group_by(n, sim, method) %>%
-  nest() %>%
-  mutate(psi = map(data, psi_from_df_nuiss)) %>%
-  unnest(psi) %>%
-  select(-data) %>%
-  group_by(n, sim, method) %>%
-  summarise(across(psi1:psi2, .fns = c(est=mean, var=var))) %>%
-  mutate(across(ends_with('var'), ~./n))
+    mutate(eif = map2(nuissance_fits, splits,
+                      ~reduce2(.x = .x,
+                               .y = parse_exprs(names(.x)),
+                               .f = add_outsamp_pred,
+                               .init = assessment(.y)) %>%
+                        repair_g() %>%
+                        calc_if())) %>%
+    select(n, sim, method, eif) %>%
+    mutate(psi1_est = map_dbl(eif, ~mean(.$psi1)),
+           psi1_var = map2_dbl(eif, n, ~var(.x$psi1)/.y),
+           psi2_est = map_dbl(eif, ~mean(.$psi2)),
+           psi2_var = map2_dbl(eif, n, ~var(.x$psi2)/.y))
+
 
 write_csv(df_psi, file = 'if_estimator_sim.csv')
 write_csv(psi_true, file='if_estimator_sim_truth.csv')

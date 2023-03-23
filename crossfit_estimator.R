@@ -167,20 +167,6 @@ fit_nuiss = function(df_cv, nuissance) {
                                                             first_colname = 'y2')))
 }
 
-psi_from_df_nuiss = function(df_nuiss) {
-  df_nuiss %>%
-    mutate(outsamp_nuissance_estimates = map2(nuissance_fits, splits,
-                                              ~reduce2(.x = .x,
-                                                       .y = parse_exprs(names(.x)),
-                                                       .f = add_outsamp_pred,
-                                                       .init = assessment(.y)) %>%
-                                                repair_g())) %>%
-    select(fold=id, outsamp_nuissance_estimates) %>%
-    unnest(outsamp_nuissance_estimates) %>%
-    calc_if()
-}
-
-
 # # 'nuissance' is a named list of functions that take in a data frame and output
 # # an object that has a predict method. Names are the column name that will be predicted from that model in the data frame.
 # # For example:
